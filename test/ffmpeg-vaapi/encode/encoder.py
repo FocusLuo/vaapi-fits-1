@@ -58,6 +58,10 @@ class EncoderTest(slash.Test):
       opts += " -refs {refs}"
     if vars(self).get("lowpower", None) is not None:
       opts += " -low_power {lowpower}"
+    #"b_strategy", "Strategy to choose between I/P/B-frames" 0->normal, 1->low_delay_b, 2->ref_b
+    #https://patchwork.ffmpeg.org/project/ffmpeg/patch/1586853861-21221-1-git-send-email-linjie.fu@intel.com/
+    if vars(self).get("lowdelayb", None) is not None:
+      opts += " -b_strategy {lowdelayb}"
     if vars(self).get("loopshp", None) is not None:
       opts += " -loop_filter_sharpness {loopshp}"
     if vars(self).get("looplvl", None) is not None:
@@ -212,10 +216,15 @@ class EncoderTest(slash.Test):
 
     # ipb mode
     ipbmode = 0 if vars(self).get("gop", 0) <= 1 else 1 if vars(self).get("bframes", 0) < 1 else 2
+    if vars(self).get("lowdelayb", None) is not None:
+      assert type(self.lowdelayb) is int and self.lowdelayb >= 0 and self.lowdelayb <= 2, "invalid lowdelayb value"
+      if 1 == self.lowdelayb :
+        ipbmode = 3
     ipbmsgs = [
       "Using intra frames only",
       "Using intra and P-frames",
-      "Using intra, P- and B-frames"
+      "Using intra, P- and B-frames",
+      "delay" #cqp output is "Low delay", cbr/vbr output is "low delay"
     ]
     m = re.search(ipbmsgs[ipbmode], self.output, re.MULTILINE)
     assert m is not None, "Possible incorrect IPB mode used"
