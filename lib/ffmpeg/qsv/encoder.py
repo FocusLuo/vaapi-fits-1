@@ -56,8 +56,8 @@ class Encoder(FFEncoder):
         r,_,_profile=self.profile.partition('-profile:v')
         _profile=_profile.strip()
         _codec_profile = self.map_profile_stringapi(self.codec, _profile)
-        if _codec_profile is None and len(_codec_profile.strip())>0:
-          slash.skip_test("{_codec_profile} profile is not supported".format(**vars(self)))
+        if _codec_profile is None:
+          slash.skip_test("profile is not supported".format(**vars(self)))
         _encparams = f"CodecProfile={_codec_profile}"
     if self.level != None and len(self.level.strip())>0:
         _level=re.findall("\d+", self.level)[0]

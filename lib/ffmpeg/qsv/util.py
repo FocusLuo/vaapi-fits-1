@@ -98,10 +98,10 @@ def mapprofile_stringapi(codec, profile):
       "main444-10" : CodecProfile.MFX_PROFILE_HEVC_REXT.value
     },
     "av1-8"   : {
-      "profile0"  : CodecProfile.MFX_PROFILE_AV1_MAIN.value,
+      "main"  : CodecProfile.MFX_PROFILE_AV1_MAIN.value,
     },
     "av1-10"   : {
-      "profile0"  : CodecProfile.MFX_PROFILE_AV1_MAIN.value,
+      "main"  : CodecProfile.MFX_PROFILE_AV1_MAIN.value,
     },
   }.get(codec, {}).get(profile, None)
 
