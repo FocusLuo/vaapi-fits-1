@@ -61,7 +61,7 @@ class Encoder(FFEncoder):
         _encparams = f"CodecProfile={_codec_profile}"
     if self.level != None and len(self.level.strip())>0:
         _level=re.findall("\d+", self.level)[0]
-        _encparams = f"CodecLevel={_level}"
+        _encparams = f"{_encparams}:CodecLevel={_level}"
     if self.qp != None and len(self.qp.strip())>0:
         _qp=re.findall("\d+", self.qp)[0]
         _encparams = f"{_encparams}:QPI={_qp}:QPP={_qp}:QPB={_qp}"
@@ -102,6 +102,9 @@ class Encoder(FFEncoder):
         _lowpower=re.findall("\d+", self.lowpower)[0]
         _encparams = f"{_encparams}:LowPower={_lowpower}"
 
+    if _encparams != None and len(_encparams.strip()) > 1:
+        if ':' == _encparams[0]:
+            _encparams = _encparams[1:]
     return f"{_encparams}"
 
   @timefn("ffmpeg:encode")

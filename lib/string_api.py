@@ -35,6 +35,12 @@ class CodecProfile(Enum):
     MFX_PROFILE_AV1_HIGH                    = 2
     MFX_PROFILE_AV1_PRO                     = 3
 
+    #/* VP9 Profiles */
+    MFX_PROFILE_VP9_0                       = 1
+    MFX_PROFILE_VP9_1                       = 2
+    MFX_PROFILE_VP9_2                       = 3
+    MFX_PROFILE_VP9_3                       = 4
+
 class CodecLevel(Enum):
     MFX_LEVEL_UNKNOWN                       =0 #/*!< Unspecified level. */
     #/* H.264 level 1-1.3 */
