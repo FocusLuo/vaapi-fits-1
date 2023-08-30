@@ -1,5 +1,7 @@
 from enum import Enum, unique
 
+#define come from _install/include/vpl/mfxstructures.h
+
 class CodecProfile(Enum):
     MFX_PROFILE_UNKNOWN                     =0 #/*!< Unspecified profile. */
 
@@ -21,7 +23,6 @@ class CodecProfile(Enum):
     MFX_PROFILE_AVC_CONSTRAINED_BASELINE    =MFX_PROFILE_AVC_BASELINE + MFX_PROFILE_AVC_CONSTRAINT_SET1
     MFX_PROFILE_AVC_CONSTRAINED_HIGH        =MFX_PROFILE_AVC_HIGH     + MFX_PROFILE_AVC_CONSTRAINT_SET4 + MFX_PROFILE_AVC_CONSTRAINT_SET5
     MFX_PROFILE_AVC_PROGRESSIVE_HIGH        =MFX_PROFILE_AVC_HIGH     + MFX_PROFILE_AVC_CONSTRAINT_SET4
-
 
     #/* HEVC profiles */
     MFX_PROFILE_HEVC_MAIN             =1
@@ -111,3 +112,56 @@ class CodecLevel(Enum):
     MFX_LEVEL_AV1_72                        = 72
     MFX_LEVEL_AV1_73                        = 73
 
+
+class RateControlMethod(Enum):
+#/*! The RateControlMethod enumerator itemizes bitrate control methods. */
+    MFX_RATECONTROL_CBR       =1 #/*!< Use the constant bitrate control algorithm. */
+    MFX_RATECONTROL_VBR       =2 #/*!< Use the variable bitrate control algorithm. */
+    MFX_RATECONTROL_CQP       =3 #/*!< Use the constant quantization parameter algorithm. */
+    MFX_RATECONTROL_AVBR      =4 #/*!< Use the average variable bitrate control algorithm. */
+    MFX_RATECONTROL_RESERVED1 =5
+    MFX_RATECONTROL_RESERVED2 =6
+    MFX_RATECONTROL_RESERVED3 =100
+    MFX_RATECONTROL_RESERVED4 =7
+    #/*!
+    #   Use the VBR algorithm with look ahead. It is a special bitrate control mode in the AVC encoder that has been designed
+    #   to improve encoding quality. It works by performing extensive analysis of several dozen frames before the actual encoding and as a side
+    #   effect significantly increases encoding delay and memory consumption.
+
+    #   The only available rate control parameter in this mode is mfxInfoMFX::TargetKbps. Two other parameters, MaxKbps and InitialDelayInKB,
+    #   are ignored. To control LA depth the application can use mfxExtCodingOption2::LookAheadDepth parameter.
+
+    #   This method is not HRD compliant.
+    #*/
+    MFX_RATECONTROL_LA        =8
+    #/*!
+    #   Use the Intelligent Constant Quality algorithm. This algorithm improves subjective video quality of encoded stream. Depending on content,
+    #   it may or may not decrease objective video quality. Only one control parameter is used - quality factor, specified by mfxInfoMFX::ICQQuality.
+    #*/
+    MFX_RATECONTROL_ICQ       =9
+    #/*!
+    #   Use the Video Conferencing Mode algorithm. This algorithm is similar to the VBR and uses the same set of parameters mfxInfoMFX::InitialDelayInKB,
+    #   TargetKbpsandMaxKbps. It is tuned for IPPP GOP pattern and streams with strong temporal correlation between frames.
+    #   It produces better objective and subjective video quality in these conditions than other bitrate control algorithms.
+    #   It does not support interlaced content, B-frames and produced stream is not HRD compliant.
+    #*/
+    MFX_RATECONTROL_VCM       =10
+    #/*!
+    #   Use Intelligent Constant Quality algorithm with look ahead. Quality factor is specified by mfxInfoMFX::ICQQuality.
+    #   To control LA depth the application can use mfxExtCodingOption2::LookAheadDepth parameter.
+    #
+    #   This method is not HRD compliant.
+    #*/
+    MFX_RATECONTROL_LA_ICQ    =11
+    #/*!
+    #   MFX_RATECONTROL_LA_EXT has been removed
+    #*/
+
+    #/*! Use HRD compliant look ahead rate control algorithm. */
+    MFX_RATECONTROL_LA_HRD    =13
+    #/*!
+    #   Use the variable bitrate control algorithm with constant quality. This algorithm trying to achieve the target subjective quality with
+    #   the minimum number of bits, while the bitrate constraint and HRD compliance are satisfied. It uses the same set of parameters
+    #   as VBR and quality factor specified by mfxExtCodingOption3::QVBRQuality.
+    #*/
+    MFX_RATECONTROL_QVBR      =14

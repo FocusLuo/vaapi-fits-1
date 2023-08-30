@@ -112,15 +112,15 @@ def mapprofile_stringapi(codec, profile):
       "main"  : CodecProfile.MFX_PROFILE_AV1_MAIN.value,
     },
     "vp9-8" : {
-      "profile0"  : MFX_PROFILE_VP9_0,
-      "profile1"  : MFX_PROFILE_VP9_1,
+      "profile0"  : CodecProfile.MFX_PROFILE_VP9_0,
+      "profile1"  : CodecProfile.MFX_PROFILE_VP9_1,
     },
     "vp9-10" : {
-      "profile1"  : MFX_PROFILE_VP9_1,
-      "profile2"  : MFX_PROFILE_VP9_2,
+      "profile1"  : CodecProfile.MFX_PROFILE_VP9_1,
+      "profile2"  : CodecProfile.MFX_PROFILE_VP9_2,
     },
     "vp9-12" : {
-      "profile3"  : MFX_PROFILE_VP9_3,
+      "profile3"  : CodecProfile.MFX_PROFILE_VP9_3,
     },
   }.get(codec, {}).get(profile, None)
 

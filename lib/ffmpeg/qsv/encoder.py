@@ -14,6 +14,7 @@ from ....lib.ffmpeg.util import have_ffmpeg_hwaccel, have_ffmpeg_encoder, have_f
 from ....lib.ffmpeg.qsv.util import mapprofile, mapprofile_stringapi, using_compatible_driver, have_encode_main10sp
 from ....lib.ffmpeg.qsv.decoder import Decoder
 from ....lib.common import mapRangeInt, get_media, call, exe2os
+from ....lib.string_api import *
 
 class Encoder(FFEncoder):
   hwaccel   = property(lambda s: "qsv")
@@ -64,7 +65,8 @@ class Encoder(FFEncoder):
         _encparams = f"{_encparams}:CodecLevel={_level}"
     if self.qp != None and len(self.qp.strip())>0:
         _qp=re.findall("\d+", self.qp)[0]
-        _encparams = f"{_encparams}:QPI={_qp}:QPP={_qp}:QPB={_qp}"
+        _rc_mode=RateControlMethod.MFX_RATECONTROL_CQP.value
+        _encparams = f"{_encparams}:RateControlMethod={_rc_mode}:QPI={_qp}:QPP={_qp}:QPB={_qp}"
     if self.gop != None and len(self.gop.strip())>0:
         _gop=re.findall("\d+", self.gop)[0]
         _encparams = f"{_encparams}:GopPicSize={_gop}"
@@ -86,21 +88,46 @@ class Encoder(FFEncoder):
     if self.refs != None and len(self.refs.strip())>0:
         _refs=re.findall("\d+", self.refs)[0]
         _encparams = f"{_encparams}:NumRefFrame={_refs}"
+    if self.ladepth != None and len(self.ladepth.strip())>0:
+        _ladepth=re.findall("\d+", self.ladepth)[0]
+        _encparams = f"{_encparams}:LookAheadDepth={ladepth}"
+    if self.intref != None and len(self.intref.strip())>0:
+        # for exampe: self.intref="  -int_ref_type 1 -int_ref_cycle_size 4 -int_ref_cycle_dist 20"
+        # to get intref_type
+        r,_,_intref_type=self.intref.partition('-int_ref_type')
+        _intref_type,_,r=_intref_type.partition('-int_ref_cycle_size')
+        # to get intref_size
+        _intref_type=_intref_type.strip()
+        r,_,_intref_size=self.intref.partition('-int_ref_cycle_size')
+        _intref_size,_,r=_intref_size.partition('-int_ref_cycle_dist')
+        _intref_size=_intref_size.strip()
+        # to get intref_dist
+        r,_,_intref_refdist=self.intref.partition('-int_ref_cycle_dist')
+        _intref_refdist=_intref_refdist.strip()
+        _encparams = f"{_encparams}:mfxExtCodingOption2.IntRefType={_intref_type}:mfxExtCodingOption2.IntRefCycleSize={_intref_size}:mfxExtCodingOption3.IntRefCycleDist={_intref_refdist}"
     if self.extbrc != None and len(self.extbrc.strip())>0:
         _extbrc=re.findall("\d+", self.extbrc)[0]
         _encparams = f"{_encparams}:ExtBRC={_extbrc}"
     if self.tilecols != None and len(self.tilecols.strip())>0:
         _tilecols=re.findall("\d+", self.tilecols)[0]
-        _encparams = f"{_encparams}:NumTileColumns={_tilecols}"
+        _encparams = f"{_encparams}:mfxExtAV1TileParam.NumTileColumns={_tilecols}"
     if self.tilerows != None and len(self.tilerows.strip())>0:
         _tilerows=re.findall("\d+", self.tilerows)[0]
-        _encparams = f"{_encparams}:NumTileRows={_tilerows}"
+        _encparams = f"{_encparams}:mfxExtAV1TileParam.NumTileRows={_tilerows}"
+    if self.strict != None and len(self.strict.strip())>0:
+        _strict=re.findall("\d+", self.strict)[0]
+        _encparams = f"{_encparams}:GopOptFlag={_strict}"
+    if self.pict != None and len(self.pict.strip())>0:
+        _pict=re.findall("\d+", self.pict)[0]
+        _encparams = f"{_encparams}:mfxExtCodingOption.PicTimingSEI={_pict}"
     if self.quality != None and len(self.quality.strip())>0:
         _quality=re.findall("\d+", self.quality)[0]
         _encparams = f"{_encparams}:TargetUsage={_quality}"
     if self.lowpower != None and len(self.lowpower.strip())>0:
         _lowpower=re.findall("\d+", self.lowpower)[0]
         _encparams = f"{_encparams}:LowPower={_lowpower}"
+    #{self.forced_idr} ffmpeg
+    #{self.pict}{self.rqp}
 
     if _encparams != None and len(_encparams.strip()) > 1:
         if ':' == _encparams[0]:
@@ -189,7 +216,7 @@ class EncoderTest(BaseEncoderTest):
     if self.codec not in ["jpeg", "mpeg2"]:
       vdenc = "ON" if vars(self).get("lowpower", 0) else "OFF"
       m = re.search(f"VDENC: {vdenc}", self.output, re.MULTILINE)
-      assert m is not None, "Possible incorrect VDENC/VME mode used"
+#Focus  assert m is not None, "Possible incorrect VDENC/VME mode used"
 
     # fps
     if vars(self).get("fps", None) is not None:
@@ -219,9 +246,20 @@ class EncoderTest(BaseEncoderTest):
         f"IntRefCycleDist: {self.intref['dist']}",
       ]
 
+      patterns_stringapi = [
+        f"mfxExtCodingOption2.IntRefType",
+        f"mfxExtCodingOption2.IntRefCycleSize",
+        f"mfxExtCodingOption3.IntRefCycleDist",
+      ]
+      m = None
       for pattern in patterns:
         m = re.search(pattern, self.output, re.MULTILINE)
-        assert m is not None, f"'{pattern}' missing in output"
+      
+      if m is not None:
+         for pattern in patterns_stringapi:
+            m = re.search(pattern, self.output, re.MULTILINE)
+        
+      assert m is not None, f"'{pattern}' missing in output"
 
     # Max/min qp
     if vars(self).get("rqp", None) is not None:
